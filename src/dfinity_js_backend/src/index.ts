@@ -154,3 +154,35 @@ export default Server(() => {
     
     return app.listen();
 });
+
+function getCurrentDate() {
+    const timestamp = new Number(ic.time());
+    return new Date(timestamp.valueOf() / 1000_000);
+}
+
+async function allowanceTransfer(to: string, amount: bigint): Promise<Result<any, string>> {
+    try {
+        const response = await fetch(`icp://${ICRC_CANISTER_PRINCIPAL}/icrc2_transfer_from`, {
+            body: serialize({
+                candidPath: "/src/icrc1-ledger.did",
+                args: [{
+                    // for optional values use an empty array notation [] instead of None is they should remain empty
+                    spender_subaccount: [],
+                    created_at_time: [],
+                    memo: [],
+                    amount,
+                    fee: [],
+                    from: { owner: ic.caller(), subaccount: [] },
+                    to: { owner: Principal.fromText(to), subaccount: [] }
+                }]
+            })
+        });
+        return Result.Ok(response);
+    } catch (err) {
+        let errorMessage = "an error occurred on approval";
+        if (err instanceof Error) {
+            errorMessage = err.message;
+        }
+        return Result.Err(errorMessage);
+    }
+}
