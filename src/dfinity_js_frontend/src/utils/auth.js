@@ -1,3 +1,5 @@
+// Allows users to log in and out using the internet identity
+
 import { AuthClient } from "@dfinity/auth-client";
 
 // that is the url of the webapp for the internet identity. 
@@ -6,7 +8,6 @@ const IDENTITY_PROVIDER = `http://${process.env.IDENTITY_CANISTER_ID}.${window.l
 // Maximum time of the authentication session in nano seconds -> looks like a week -> 7 * 24
 const MAX_TTL = 7 * 24 * 60 * 60 * 1000 * 1000 * 1000;
 
-// Allows users to log in and out
 export async function getAuthClient() {
     return await AuthClient.create();
 }
