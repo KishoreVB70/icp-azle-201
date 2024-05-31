@@ -1,5 +1,6 @@
 import { logout } from "./auth";
 
+// HTTP client to make request to the ICP canister and obtain responses back
 class IcHttp {
     // # is an indication of private fields, these fields can only be accessed within the class
     #agent;
@@ -8,6 +9,7 @@ class IcHttp {
 
     // Only requires the agent as input
     // Agent could be a HTTP client or an API 
+    // The agent is from the dfinity package
     constructor(agent) {
         this.#agent = agent;
         this.#decoder = new TextDecoder('utf-8');
@@ -31,7 +33,7 @@ class IcHttp {
             switch (method) {
                 // Get method doesn't have a body and headers
                 case "GET":
-                    // Await the respone from the backend
+                    // Await the respone from the canister
                     response = await this.#agent.http_request({
                         // The URL would contain the required information
                         url,
@@ -40,7 +42,7 @@ class IcHttp {
                         headers: [],
                         certificate_version: [],
                     });
-                    // Returns the result of the request( respone from the backend )
+                    // Returns the result of the request( respone from the canister )
                     return this.#parseResponse(response);
                 
                 // Other methods have body and header
@@ -63,6 +65,7 @@ class IcHttp {
                     throw new Error(`Unknown method: ${method}`);
             }
         } catch (err) {
+            // If response error, then logout the user
             if (err.name === 'AgentHTTPResponseError') {
                 logout();
             }
@@ -71,7 +74,7 @@ class IcHttp {
 
     #parseResponse(response) {
         try {
-            // Checks for the status code, hence I need to set all the response to 200 in the backend
+            // Checks for the status code, hence I need to set all the response to 200 in the canister
             const body = this.#decoder.decode(response.body);
 
             // If not succesful, throw the error
